@@ -12,8 +12,8 @@ import re
 import hashlib
 
 def convert_markdown_to_html(input_file, output_file):
-    """A markdown file
-
+    """A markdown file to HTML file converter
+    
     Args:
         input_file (_type_): _description_
         output_file (_type_): _description_

@@ -21,6 +21,27 @@ def parse_headings(html):
     html = html.replace('<h6>', '<h6>').replace('</h6>', '</h6>')
     return html
 
+def parse_lists(html):
+    html = html.replace('<ul>', '<ul>').replace('</ul>', '</ul>')
+    html = html.replace('<ol>', '<ol>').replace('</ol>', '</ol>')
+    html = html.replace('<li>', '<li>').replace('</li>', '</li>')
+    return html
+
+def parse_unordered_lists(html):
+    html = html.replace('<ul>', '<ul>').replace('</ul>', '</ul>')
+    html = html.replace('<li>', '<li>').replace('</li>', '</li>')
+    return html
+
+def parse_paragraphs(html):
+    # Wrap each paragraph with <p> tags
+    paragraphs = html.split('\n\n')
+    html = ''
+    for paragraph in paragraphs:
+        html += f'<p>\n{paragraph}\n</p>\n'
+    # Add <br> tag for line breaks within paragraphs
+    html = html.replace('<p>\n', '<p>\n    ').replace('\n</p>', '\n</p>\n')
+    return html
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: ./markdown2html.py README.md README.html", file=sys.stderr)

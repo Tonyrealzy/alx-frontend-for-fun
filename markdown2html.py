@@ -1,4 +1,10 @@
 #!/usr/bin/python3
+""" A script that takes an argument 2 strings;
+First argument is the name of the Markdown file
+Second argument is the output file name
+Returns:
+    _type_: _description_
+"""
 
 import sys
 import markdown
@@ -6,6 +12,13 @@ import re
 import hashlib
 
 def convert_markdown_to_html(input_file, output_file):
+    """A markdown file
+
+    Args:
+        input_file (_type_): _description_
+        output_file (_type_): _description_
+    """
+    
     try:
         with open(input_file, 'r') as f:
             markdown_text = f.read()
@@ -15,7 +28,8 @@ def convert_markdown_to_html(input_file, output_file):
     except FileNotFoundError:
         print(f"Missing {input_file}", file=sys.stderr)
         sys.exit(1)
-        
+
+"""Generating HTML Headings"""        
 def parse_headings(html):
     html = html.replace('<h1>', '<h1>').replace('</h1>', '</h1>')
     html = html.replace('<h2>', '<h2>').replace('</h2>', '</h2>')
@@ -25,17 +39,20 @@ def parse_headings(html):
     html = html.replace('<h6>', '<h6>').replace('</h6>', '</h6>')
     return html
 
+"""Generating HTML Ordered Lists"""
 def parse_lists(html):
     html = html.replace('<ul>', '<ul>').replace('</ul>', '</ul>')
     html = html.replace('<ol>', '<ol>').replace('</ol>', '</ol>')
     html = html.replace('<li>', '<li>').replace('</li>', '</li>')
     return html
 
+"""Generating HTML Unordered Lists"""
 def parse_unordered_lists(html):
     html = html.replace('<ul>', '<ul>').replace('</ul>', '</ul>')
     html = html.replace('<li>', '<li>').replace('</li>', '</li>')
     return html
 
+"""Generating HTML Paragraphs"""
 def parse_paragraphs(html):
     # Wrap each paragraph with <p> tags
     paragraphs = html.split('\n\n')
@@ -46,6 +63,7 @@ def parse_paragraphs(html):
     html = html.replace('<p>\n', '<p>\n    ').replace('\n</p>', '\n</p>\n')
     return html
 
+"""Generating HTML Bold texts"""
 def parse_bold(html):
     # Parsing for '**text**' bold syntax
     html = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', html)
@@ -53,6 +71,7 @@ def parse_bold(html):
     html = re.sub(r'__(.*?)__', r'<em>\1</em>', html)
     return html
 
+"""Generating HTML lower case"""
 def parse_custom_syntax(html):
     # Parsing for [[text]] bold syntax and convert to MD5 (lowercase)
     html = re.sub(r'\[\[(.*?)\]\]', lambda match: hashlib.md5(match.group(1).encode()).hexdigest(), html)

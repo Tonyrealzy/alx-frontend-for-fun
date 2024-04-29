@@ -1,1 +1,1 @@
-### This repository contains all project files for my alx-frontend-for-fun tasks.
+### This repository contains my project file for my alx-frontend-for-fun tasks.

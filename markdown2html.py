@@ -1,5 +1,7 @@
 import sys
 import markdown
+import re
+import hashlib
 
 def convert_markdown_to_html(input_file, output_file):
     try:
@@ -40,6 +42,20 @@ def parse_paragraphs(html):
         html += f'<p>\n{paragraph}\n</p>\n'
     # Add <br> tag for line breaks within paragraphs
     html = html.replace('<p>\n', '<p>\n    ').replace('\n</p>', '\n</p>\n')
+    return html
+
+def parse_bold(html):
+    # Parsing for '**text**' bold syntax
+    html = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', html)
+    # Parsing for '__text__' bold syntax
+    html = re.sub(r'__(.*?)__', r'<em>\1</em>', html)
+    return html
+
+def parse_custom_syntax(html):
+    # Parsing for [[text]] bold syntax and convert to MD5 (lowercase)
+    html = re.sub(r'\[\[(.*?)\]\]', lambda match: hashlib.md5(match.group(1).encode()).hexdigest(), html)
+    # Parsing for ((text)) bold syntax and remove all 'c' (case insensitive) from the content
+    html = re.sub(r'\(\((.*?)\)\)', lambda match: match.group(1).replace('c', '').replace('C', ''), html)
     return html
 
 if __name__ == "__main__":

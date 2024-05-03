@@ -8,85 +8,93 @@ Returns:
 """
 
 import sys
-import markdown
+import os.path
 import re
 import hashlib
 
-def convert_markdown_to_html(input_file, output_file):
-    """A markdown file to HTML file converter
-    
-    Args:
-        input_file (_type_): _description_
-        output_file (_type_): _description_
-    """
-    
-    try:
-        with open(input_file, 'r') as f:
-            markdown_text = f.read()
-            html = markdown.markdown(markdown_text)
-        with open(output_file, 'w') as f:
-            f.write(html)
-    except FileNotFoundError:
-        print(f"Missing {input_file}", file=sys.stderr)
-        sys.exit(1)
-
-"""Generating HTML Headings"""        
-def parse_headings(html):
-    html = html.replace('<h1>', '<h1>').replace('</h1>', '</h1>')
-    html = html.replace('<h2>', '<h2>').replace('</h2>', '</h2>')
-    html = html.replace('<h3>', '<h3>').replace('</h3>', '</h3>')
-    html = html.replace('<h4>', '<h4>').replace('</h4>', '</h4>')
-    html = html.replace('<h5>', '<h5>').replace('</h5>', '</h5>')
-    html = html.replace('<h6>', '<h6>').replace('</h6>', '</h6>')
-    return html
-
-"""Generating HTML Ordered Lists"""
-def parse_lists(html):
-    html = html.replace('<ul>', '<ul>').replace('</ul>', '</ul>')
-    html = html.replace('<ol>', '<ol>').replace('</ol>', '</ol>')
-    html = html.replace('<li>', '<li>').replace('</li>', '</li>')
-    return html
-
-"""Generating HTML Unordered Lists"""
-def parse_unordered_lists(html):
-    html = html.replace('<ul>', '<ul>').replace('</ul>', '</ul>')
-    html = html.replace('<li>', '<li>').replace('</li>', '</li>')
-    return html
-
-"""Generating HTML Paragraphs"""
-def parse_paragraphs(html):
-    # Wrap each paragraph with <p> tags
-    paragraphs = html.split('\n\n')
-    html = ''
-    for paragraph in paragraphs:
-        html += f'<p>\n{paragraph}\n</p>\n'
-    # Add <br> tag for line breaks within paragraphs
-    html = html.replace('<p>\n', '<p>\n    ').replace('\n</p>', '\n</p>\n')
-    return html
-
-"""Generating HTML Bold texts"""
-def parse_bold(html):
-    # Parsing for '**text**' bold syntax
-    html = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', html)
-    # Parsing for '__text__' bold syntax
-    html = re.sub(r'__(.*?)__', r'<em>\1</em>', html)
-    return html
-
-"""Generating HTML lower case"""
-def parse_custom_syntax(html):
-    # Parsing for [[text]] bold syntax and convert to MD5 (lowercase)
-    html = re.sub(r'\[\[(.*?)\]\]', lambda match: hashlib.md5(match.group(1).encode()).hexdigest(), html)
-    # Parsing for ((text)) bold syntax and remove all 'c' (case insensitive) from the content
-    html = re.sub(r'\(\((.*?)\)\)', lambda match: match.group(1).replace('c', '').replace('C', ''), html)
-    return html
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print("Usage: ./markdown2html.py README.md README.html", file=sys.stderr)
-        sys.exit(1)
-    
-    input_file = sys.argv[1]
-    output_file = sys.argv[2]
-    
-    convert_markdown_to_html(input_file, output_file)
-    sys.exit(0)
+        print('Usage: ./markdown2html.py README.md README.html',
+              file=sys.stderr)
+        exit(1)
+
+    if not os.path.isfile(sys.argv[1]):
+        print('Missing {}'.format(sys.argv[1]), file=sys.stderr)
+        exit(1)
+
+    with open(sys.argv[1]) as read:
+        with open(sys.argv[2], 'w') as html:
+            unordered_start, ordered_start, paragraph = False, False, False
+            # bold syntax
+            for line in read:
+                line = line.replace('**', '<b>', 1)
+                line = line.replace('**', '</b>', 1)
+                line = line.replace('__', '<em>', 1)
+                line = line.replace('__', '</em>', 1)
+
+                # md5
+                md5 = re.findall(r'\[\[.+?\]\]', line)
+                md5_inside = re.findall(r'\[\[(.+?)\]\]', line)
+                if md5:
+                    line = line.replace(md5[0], hashlib.md5(
+                        md5_inside[0].encode()).hexdigest())
+
+                # remove the letter C
+                remove_letter_c = re.findall(r'\(\(.+?\)\)', line)
+                remove_c_more = re.findall(r'\(\((.+?)\)\)', line)
+                if remove_letter_c:
+                    remove_c_more = ''.join(
+                        c for c in remove_c_more[0] if c not in 'Cc')
+                    line = line.replace(remove_letter_c[0], remove_c_more)
+
+                length = len(line)
+                headings = line.lstrip('#')
+                heading_num = length - len(headings)
+                unordered = line.lstrip('-')
+                unordered_num = length - len(unordered)
+                ordered = line.lstrip('*')
+                ordered_num = length - len(ordered)
+                # headings, lists
+                if 1 <= heading_num <= 6:
+                    line = '<h{}>'.format(
+                        heading_num) + headings.strip() + '</h{}>\n'.format(
+                        heading_num)
+
+                if unordered_num:
+                    if not unordered_start:
+                        html.write('<ul>\n')
+                        unordered_start = True
+                    line = '<li>' + unordered.strip() + '</li>\n'
+                if unordered_start and not unordered_num:
+                    html.write('</ul>\n')
+                    unordered_start = False
+
+                if ordered_num:
+                    if not ordered_start:
+                        html.write('<ol>\n')
+                        ordered_start = True
+                    line = '<li>' + ordered.strip() + '</li>\n'
+                if ordered_start and not ordered_num:
+                    html.write('</ol>\n')
+                    ordered_start = False
+
+                if not (heading_num or unordered_start or ordered_start):
+                    if not paragraph and length > 1:
+                        html.write('<p>\n')
+                        paragraph = True
+                    elif length > 1:
+                        html.write('<br/>\n')
+                    elif paragraph:
+                        html.write('</p>\n')
+                        paragraph = False
+
+                if length > 1:
+                    html.write(line)
+
+            if unordered_start:
+                html.write('</ul>\n')
+            if ordered_start:
+                html.write('</ol>\n')
+            if paragraph:
+                html.write('</p>\n')
+    exit (0)

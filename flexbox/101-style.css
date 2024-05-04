@@ -1,0 +1,28 @@
+.container {
+    display: flex;
+    flex-direction: row;
+}
+.box {
+    color: white;
+    padding: 1rem;
+}
+.box1 {
+    background-color: green;
+    font-size: 2rem;
+}
+.box2 {
+    background-color: blue;
+    font-size: 3rem;
+}
+.box3 {
+    background-color: darkslategray;
+    font-size: 4rem;
+}
+.box4 {
+    background-color: purple;
+    font-size: 3rem;
+}
+.box5 {
+    background-color: orange;
+    font-size: 2rem;
+}

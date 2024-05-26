@@ -1,0 +1,7 @@
+.link {
+    color: maroon;
+}
+.link:hover {
+    text-decoration: none;
+    transition: text-decoration 1.5s ease-out;
+}

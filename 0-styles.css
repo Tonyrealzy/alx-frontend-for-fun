@@ -1,0 +1,52 @@
+body {
+  margin: 100px;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-weight: 600;
+  font-size: 2.5rem;
+}
+.iconList {
+    display: flex;
+    padding: 0;
+    margin: 10px;
+    list-style: none;
+    gap: 20px;
+}
+.iconList li {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    height: 100px;
+    padding-bottom: 250px;
+    overflow: hidden;
+    border: 1px solid black;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.icon {
+    position: absolute;
+    top: 100px;
+    left: 0;
+    height: 100%;
+    width: 100%;
+  background-image: url("/alx-frontend-for-fun/myTag.png");
+  background-size: 600px 200px;
+  background-repeat: no-repeat;
+  opacity: 1;
+  z-index: -1;
+}
+.i-html {
+  background-position: 0 0;
+}
+.i-css {
+  background-position: -200px 0;
+}
+.i-js {
+  background-position: -400px 0;
+}
